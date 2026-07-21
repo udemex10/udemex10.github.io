@@ -448,6 +448,14 @@ button {
   font-size: clamp(2.1rem, 4.3vw, 4.5rem);
 }
 
+.role-compact .role-title-row {
+  margin-top: 1.25rem;
+}
+
+.role-compact .role-title-row h3 {
+  margin-top: 0;
+}
+
 .role-compact .role-summary {
   max-width: 41rem;
   margin-top: 1rem;
