@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://udemex10.github.io/sitemap.xml
+Sitemap: https://uekanem.com/sitemap.xml

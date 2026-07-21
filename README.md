@@ -1,6 +1,6 @@
 # Udeme Ekanem — Personal Website
 
-Personal portfolio for [Udeme Ekanem](https://udemex10.github.io), founder-engineer and CTO.
+Personal portfolio for [Udeme Ekanem](https://uekanem.com), founder-engineer and CTO.
 
 ## Local preview
 
