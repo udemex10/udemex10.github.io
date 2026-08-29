@@ -342,6 +342,7 @@ button {
 }
 
 .role-body {
+  position: relative;
   max-width: 66rem;
 }
 
@@ -446,6 +447,15 @@ button {
 .role-compact h3 {
   margin-top: 1.25rem;
   font-size: clamp(2.1rem, 4.3vw, 4.5rem);
+}
+
+.role-compact h3.role-title-long {
+  font-size: clamp(1.85rem, 3.65vw, 3.85rem);
+  white-space: nowrap;
+}
+
+.role-title-long span {
+  color: #bbb8ae;
 }
 
 .role-compact .role-title-row {
@@ -847,6 +857,20 @@ button:focus-visible {
 
   .role-compact h3 {
     font-size: 2.35rem;
+  }
+
+  .role-compact h3.role-title-long {
+    font-size: clamp(1.05rem, calc(8vw - 0.6rem), 1.45rem);
+  }
+
+  .role-title-row-long {
+    display: block;
+  }
+
+  .role-title-row-long a {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   .about {
