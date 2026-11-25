@@ -13,7 +13,6 @@
 
 const root = document.documentElement;
 const canvas = document.querySelector(".stage");
-const hint = document.querySelector(".hint");
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const ue = (window.__ue = window.__ue || { scene: "index", velocity: 0, hover: 0, pointer: { x: 0, y: 0 } });
 
@@ -453,11 +452,6 @@ function start() {
   let returning = false;
   let morphLanded = true;
 
-  const announce = (k) => {
-    if (!hint) return;
-    hint.textContent = `Form ${String(k + 1).padStart(2, "0")} / 05 — ${SHAPES[k]}`;
-  };
-
   const morphTo = (k) => {
     if (k === formB && formA === formB) return;
     if (formA !== formB) formA = morphT > 0.5 ? formB : formA;
@@ -547,7 +541,6 @@ function start() {
       const next = (formB + 1) % SHAPES.length;
       ripple(pointer.x, pointer.y, 0.06);
       morphTo(next);
-      announce(next);
     } else {
       returning = true;
       kick(1.4);
