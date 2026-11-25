@@ -426,8 +426,21 @@ main {
   }
 }
 
+/* The form is draggable: grab cursors while over it / holding it. */
+.can-grab body {
+  cursor: grab;
+}
+
+.is-grabbing,
+.is-grabbing * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
 .hint {
-  grid-column: 7 / span 2;
+  grid-column: 6 / span 3;
+  justify-self: center;
+  white-space: nowrap;
   transition: opacity 600ms ease;
 }
 

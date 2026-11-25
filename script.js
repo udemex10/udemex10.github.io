@@ -112,6 +112,7 @@
     try {
       lenis = new window.Lenis({ lerp: 0.09, smoothWheel: true });
       lenis.on("scroll", (e) => (ue.velocity = e.velocity));
+      ue.lenis = lenis;
     } catch (e) {
       lenis = null;
     }
