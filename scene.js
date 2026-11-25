@@ -479,9 +479,28 @@ function start() {
 
   const isControl = (el) => !!(el && el.closest && el.closest("a, button, input, textarea, select, label"));
 
+  // `pressed`: a button / finger is down on the form.
+  // `dragging`: that press has moved far enough to become a pull (droplets).
+  // A tap never becomes a pull, so it morphs cleanly on mouse and touch alike.
+  const PULL_THRESHOLD = 8;
+  let pressed = false;
+
   const updateCursor = () => {
-    root.classList.toggle("can-grab", pointer.inside && !dragging);
-    root.classList.toggle("is-grabbing", dragging);
+    root.classList.toggle("can-grab", pointer.inside && !pressed);
+    root.classList.toggle("is-grabbing", pressed);
+  };
+
+  const startPull = () => {
+    dragging = true;
+    // Seed the chain on the surface under the pointer so it grows out of the body.
+    const gd = Math.hypot(pointer.x - center.x, pointer.y - center.y) || 1e-4;
+    anchorDir.x = (pointer.x - center.x) / gd;
+    anchorDir.y = (pointer.y - center.y) / gd;
+    drops.forEach((d) => {
+      d.x = center.x + anchorDir.x * S * 0.62;
+      d.y = center.y + anchorDir.y * S * 0.62;
+      d.vx = d.vy = 0;
+    });
   };
 
   window.addEventListener(
@@ -491,11 +510,23 @@ function start() {
       pointer.x = w.x;
       pointer.y = w.y;
       pointer.active = true;
-      pointer.inside = interactive() && !isControl(e.target) && overForm(w.x, w.y);
+      // Hover (the bulge that leans toward the cursor) is a mouse-only idea:
+      // a finger never "leaves", so it would otherwise stay stuck out.
+      pointer.inside =
+        e.pointerType === "mouse" && interactive() && !isControl(e.target) && overForm(w.x, w.y);
+      if (pressed && !dragging && down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > PULL_THRESHOLD) {
+        startPull();
+      }
       updateCursor();
     },
     { passive: true },
   );
+
+  // Mouse left the window: drop any hover state.
+  document.addEventListener("pointerleave", () => {
+    pointer.inside = false;
+    updateCursor();
+  });
 
   window.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || isControl(e.target) || !interactive()) return;
@@ -503,19 +534,11 @@ function start() {
     if (!overForm(w.x, w.y)) return;
     pointer.x = w.x;
     pointer.y = w.y;
-    dragging = true;
-    down = { x: e.clientX, y: e.clientY, time: performance.now() };
+    pressed = true;
+    dragging = false;
+    down = { x: e.clientX, y: e.clientY, time: performance.now(), type: e.pointerType };
     e.preventDefault();
     ue.lenis?.stop();
-    // Seed the chain on the surface under the cursor so it grows out of the body.
-    const gd = Math.hypot(w.x - center.x, w.y - center.y) || 1e-4;
-    anchorDir.x = (w.x - center.x) / gd;
-    anchorDir.y = (w.y - center.y) / gd;
-    drops.forEach((d) => {
-      d.x = center.x + anchorDir.x * S * 0.62;
-      d.y = center.y + anchorDir.y * S * 0.62;
-      d.vx = d.vy = 0;
-    });
     kick(-0.7);
     updateCursor();
   });
@@ -533,18 +556,26 @@ function start() {
   );
 
   const release = (e) => {
-    if (!dragging) return;
+    if (!pressed) return;
+    const wasPull = dragging;
+    const cancelled = !e || e.type === "pointercancel";
+    pressed = false;
     dragging = false;
-    const moved = e && down ? Math.hypot(e.clientX - down.x, e.clientY - down.y) : 99;
-    const quick = down && performance.now() - down.time < 420;
-    if (moved < 7 && quick) {
+    if (wasPull) {
+      // Droplets fly home and merge.
+      returning = true;
+      kick(1.4);
+    } else if (!cancelled && down && performance.now() - down.time < 600) {
+      // A tap: ripple from the touch point and pour into the next form.
       const next = (formB + 1) % SHAPES.length;
       ripple(pointer.x, pointer.y, 0.06);
       morphTo(next);
     } else {
-      returning = true;
-      kick(1.4);
+      // A long press without moving: just let the squash spring back.
+      kick(0.9);
     }
+    // Touch and pen have no hover; lifting the finger ends all interaction.
+    if (!e || e.pointerType !== "mouse") pointer.inside = false;
     down = null;
     ue.lenis?.start();
     updateCursor();
